@@ -4,17 +4,14 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 const gallery = document.querySelector(".gallery");
 const loader = document.querySelector(".loader");
 
-
 const lightbox = new SimpleLightbox(".gallery a", {
     captionsData: "alt",
     captionDelay: 250,
 });
 
-
 export function clearGallery() {
     gallery.innerHTML = "";
 }
-
 
 function createMarkup(images) {
     return images
@@ -44,13 +41,11 @@ function createMarkup(images) {
         .join("");
 }
 
-
 export function renderGallery(images) {
     const markup = createMarkup(images);
     gallery.insertAdjacentHTML("beforeend", markup);
     lightbox.refresh();
 }
-
 
 export function showLoader() {
     loader.style.display = "block";
