@@ -2,19 +2,9 @@ import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 
 import { getImagesByQuery } from "./js/pixabay-api";
-import { renderGallery, clearGallery } from "./js/render-functions";
+import { renderGallery, clearGallery, showLoader, hideLoader } from "./js/render-functions";
 
 const form = document.querySelector(".form");
-const loader = document.querySelector(".loader"); // спінер
-
-// Функції для показу/приховання loader
-function showLoader() {
-    loader.style.display = "block";
-}
-
-function hideLoader() {
-    loader.style.display = "none";
-}
 
 form.addEventListener("submit", async event => {
     event.preventDefault();
@@ -22,7 +12,6 @@ form.addEventListener("submit", async event => {
     const input = event.currentTarget.elements["search-text"];
     const query = input.value.trim();
 
-    // Перевірка на пустий рядок
     if (query === "") {
         iziToast.warning({
             message: "Введіть текст для пошуку!",
@@ -32,7 +21,7 @@ form.addEventListener("submit", async event => {
     }
 
     clearGallery();
-    showLoader(); // показуємо спінер під час запиту
+    showLoader();
 
     try {
         const images = await getImagesByQuery(query);
@@ -48,12 +37,12 @@ form.addEventListener("submit", async event => {
         renderGallery(images);
 
     } catch (error) {
+        console.error(error);
         iziToast.error({
             message: "Сталася помилка при запиті!",
             position: "topRight",
         });
-        console.error(error);
     } finally {
-        hideLoader(); // ховаємо спінер після завершення запиту
+        hideLoader();
     }
 });
