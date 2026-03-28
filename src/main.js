@@ -7,6 +7,8 @@ import {
     clearGallery,
     showLoader,
     hideLoader,
+    showLoadMoreButton,
+    hideLoadMoreButton,
 } from "./js/render-functions";
 
 const form = document.querySelector(".form");
@@ -16,16 +18,18 @@ let query = "";
 let page = 1;
 const PER_PAGE = 15;
 
-loadMoreBtn.style.display = "none";
+// При старті кнопка прихована через render-functions
+hideLoadMoreButton();
 
 async function fetchImages(isNewSearch = false) {
     showLoader();
+    hideLoadMoreButton(); // Блокуємо кнопку під час запиту
 
     try {
         const data = await getImagesByQuery(query, page);
 
         if (isNewSearch) {
-            clearGallery();
+            clearGallery(); // ✅ очищаємо галерею до запиту
         }
 
         if (data.hits.length === 0 && isNewSearch) {
@@ -34,7 +38,6 @@ async function fetchImages(isNewSearch = false) {
                     "Sorry, there are no images matching your search query. Please try again!",
                 position: "topRight",
             });
-            loadMoreBtn.style.display = "none";
             return;
         }
 
@@ -42,22 +45,20 @@ async function fetchImages(isNewSearch = false) {
 
         const totalPages = Math.ceil(data.totalHits / PER_PAGE);
 
-        if (page >= totalPages) {
-            loadMoreBtn.style.display = "none";
-
+        if (page < totalPages) {
+            showLoadMoreButton(); // Показуємо кнопку тільки якщо ще є сторінки
+        } else if (page >= totalPages && !isNewSearch) {
             iziToast.info({
                 message:
                     "We're sorry, but you've reached the end of search results.",
                 position: "topRight",
             });
-        } else {
-            loadMoreBtn.style.display = "block";
         }
+
         if (!isNewSearch) {
             const galleryItem = document.querySelector(".gallery li");
             if (galleryItem) {
                 const { height } = galleryItem.getBoundingClientRect();
-
                 window.scrollBy({
                     top: height * 2,
                     behavior: "smooth",
@@ -75,9 +76,8 @@ async function fetchImages(isNewSearch = false) {
     }
 }
 
-form.addEventListener("submit", e => {
+form.addEventListener("submit", (e) => {
     e.preventDefault();
-
     const input = e.currentTarget.elements["search-text"];
     query = input.value.trim();
 
@@ -90,8 +90,6 @@ form.addEventListener("submit", e => {
     }
 
     page = 1;
-    loadMoreBtn.style.display = "none";
-
     fetchImages(true);
 });
 
