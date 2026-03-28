@@ -18,19 +18,19 @@ let query = "";
 let page = 1;
 const PER_PAGE = 15;
 
-// При старті кнопка прихована через render-functions
 hideLoadMoreButton();
 
 async function fetchImages(isNewSearch = false) {
+    if (isNewSearch) {
+        clearGallery();
+        page = 1;
+    }
+
+    hideLoadMoreButton();
     showLoader();
-    hideLoadMoreButton(); // Блокуємо кнопку під час запиту
 
     try {
         const data = await getImagesByQuery(query, page);
-
-        if (isNewSearch) {
-            clearGallery(); // ✅ очищаємо галерею до запиту
-        }
 
         if (data.hits.length === 0 && isNewSearch) {
             iziToast.error({
@@ -46,11 +46,11 @@ async function fetchImages(isNewSearch = false) {
         const totalPages = Math.ceil(data.totalHits / PER_PAGE);
 
         if (page < totalPages) {
-            showLoadMoreButton(); // Показуємо кнопку тільки якщо ще є сторінки
-        } else if (page >= totalPages && !isNewSearch) {
+            showLoadMoreButton();
+        } else {
+
             iziToast.info({
-                message:
-                    "We're sorry, but you've reached the end of search results.",
+                message: "We're sorry, but you've reached the end of search results.",
                 position: "topRight",
             });
         }
@@ -89,7 +89,6 @@ form.addEventListener("submit", (e) => {
         return;
     }
 
-    page = 1;
     fetchImages(true);
 });
 
